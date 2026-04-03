@@ -1,4 +1,12 @@
 package com.paymentsystem.paymentservice.repositories;
 
-public interface TransactionRepository {
+import com.paymentsystem.paymentservice.domain.entity.Transaction;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+
+public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 }
