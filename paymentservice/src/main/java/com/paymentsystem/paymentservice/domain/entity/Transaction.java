@@ -40,4 +40,9 @@ public class Transaction {
 
     @Column(unique = true)
     private String idempotencyKey;
+
+    @PrePersist
+    protected void onCreate() {
+        this.timestamp = LocalDateTime.now();
+    }
 }
