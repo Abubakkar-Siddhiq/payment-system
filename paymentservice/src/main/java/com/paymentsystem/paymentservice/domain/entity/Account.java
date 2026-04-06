@@ -28,7 +28,7 @@ public class Account {
     @Column(nullable = false)
     private String owner;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
     @Enumerated(EnumType.STRING)
