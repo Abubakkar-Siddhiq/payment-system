@@ -2,13 +2,13 @@ package com.paymentsystem.paymentservice.kafka.event;
 
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import lombok.Builder;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-//@Setter
+@Data
 @Builder
 public class TransactionEvent {
     private UUID transactionId;
