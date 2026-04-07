@@ -20,7 +20,7 @@ public class TransactionResponse {
     private UUID sender;
     private UUID receiver;
     private BigDecimal amount;
-    private Currency currency;
+//    private Currency currency;
     private TransactionStatus status;
     private LocalDateTime timestamp;
     private String message;
