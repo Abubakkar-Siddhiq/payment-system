@@ -1,8 +1,5 @@
 package com.paymentsystem.paymentservice.domain.dtos.request;
 
-import com.paymentsystem.paymentservice.domain.enums.Currency;
-
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -27,7 +24,4 @@ public class TransactionRequestDto {
 
     @NotNull @Positive(message = "Amount is required")
     private BigDecimal amount;
-
-    @NotNull(message = "Currency is required")
-    private Currency currency;
 }
