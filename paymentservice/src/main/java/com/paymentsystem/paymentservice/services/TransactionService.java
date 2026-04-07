@@ -3,6 +3,7 @@ package com.paymentsystem.paymentservice.services;
 import com.paymentsystem.paymentservice.domain.entity.Account;
 import com.paymentsystem.paymentservice.domain.entity.Transaction;
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
+import com.paymentsystem.paymentservice.exception.PaymentException;
 import com.paymentsystem.paymentservice.kafka.PaymentEventProducer;
 import com.paymentsystem.paymentservice.kafka.event.TransactionEvent;
 import com.paymentsystem.paymentservice.repositories.AccountRepository;
@@ -37,12 +38,11 @@ public class TransactionService {
             String value = redisTemplate.opsForValue().get(idkey);
 
             if (value == null) {
-                throw new RuntimeException("Invalid idempotency state");
+                throw new PaymentException("Invalid idempotency state");
             }
 
             if ("PROCESSING".equals(value)) {
-                throw new RuntimeException("Request already in progress");
-                // OR return HTTP 409 / 429
+                throw new PaymentException("Request already in progress");
             }
 
             return transactionRepository.findById(UUID.fromString(value))
@@ -50,9 +50,9 @@ public class TransactionService {
         }
 
         Account sender = accountRepository.findByIdWithLock(senderId)
-                .orElseThrow(() -> new RuntimeException("Sender account not found"));
+                .orElseThrow(() -> new PaymentException("Sender account not found"));
         Account receiver = accountRepository.findByIdWithLock(receiverId)
-                .orElseThrow(() -> new RuntimeException("Receiver account not found"));
+                .orElseThrow(() -> new PaymentException("Receiver account not found"));
 
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
@@ -60,12 +60,12 @@ public class TransactionService {
         transaction.setReceiver(receiver);
 
         if(sender.getCurrency() != receiver.getCurrency()) {
-            transaction.setStatus(TransactionStatus.FAILED);
+            throw new PaymentException("Currency mismatch.");
         }
 
         if (sender.getBalance().compareTo(amount) < 0) {
-            System.out.println("FAILED!!!!!");
             transaction.setStatus(TransactionStatus.FAILED);
+            throw new PaymentException("Insufficient Balance");
         } else {
             sender.setBalance(sender.getBalance().subtract(amount));
             receiver.setBalance(receiver.getBalance().add(amount));
