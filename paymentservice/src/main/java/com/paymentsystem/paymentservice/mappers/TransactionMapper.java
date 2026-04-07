@@ -5,7 +5,6 @@ import com.paymentsystem.paymentservice.domain.dtos.request.TransactionRequestDt
 import com.paymentsystem.paymentservice.domain.dtos.response.TransactionResponse;
 import com.paymentsystem.paymentservice.domain.entity.Account;
 import com.paymentsystem.paymentservice.domain.entity.Transaction;
-import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

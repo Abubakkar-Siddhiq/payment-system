@@ -14,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -28,22 +26,47 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final PaymentEventProducer paymentEventProducer;
+    private final ObjectMapper objectMapper;
 
     @Transactional
-    public Transaction processPayment(Account sender, Account receiver, BigDecimal amount, String idkey) {
-        if(redisTemplate.opsForValue().get(idkey) != null) {
-            String id = redisTemplate.opsForValue().get(idkey);
-            assert id != null;
-            Optional<Transaction> transaction = transactionRepository.findById(UUID.fromString(id));
-            return transaction.orElse(null);
+    public Transaction processPayment(UUID senderId, UUID receiverId, BigDecimal amount, String idkey) {
+        Boolean locked = redisTemplate.opsForValue()
+                .setIfAbsent(idkey, "PROCESSING", 10, TimeUnit.MINUTES);
+
+        if (Boolean.FALSE.equals(locked)) {
+            String value = redisTemplate.opsForValue().get(idkey);
+
+            if (value == null) {
+                throw new RuntimeException("Invalid idempotency state");
+            }
+
+            if ("PROCESSING".equals(value)) {
+                throw new RuntimeException("Request already in progress");
+                // OR return HTTP 409 / 429
+            }
+
+            return transactionRepository.findById(UUID.fromString(value))
+                    .orElseThrow();
         }
+
+        Account sender = accountRepository.findByIdWithLock(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender account not found"));
+        Account receiver = accountRepository.findByIdWithLock(receiverId)
+                .orElseThrow(() -> new RuntimeException("Receiver account not found"));
 
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setSender(sender);
         transaction.setReceiver(receiver);
 
-        if(sender.getBalance().compareTo(amount) >= 1) {
+        if(sender.getCurrency() != receiver.getCurrency()) {
+            transaction.setStatus(TransactionStatus.FAILED);
+        }
+
+        if (sender.getBalance().compareTo(amount) < 0) {
+            System.out.println("FAILED!!!!!");
+            transaction.setStatus(TransactionStatus.FAILED);
+        } else {
             sender.setBalance(sender.getBalance().subtract(amount));
             receiver.setBalance(receiver.getBalance().add(amount));
 
@@ -51,27 +74,22 @@ public class TransactionService {
             accountRepository.save(receiver);
 
             transaction.setStatus(TransactionStatus.SUCCESS);
-
-            TransactionEvent event = TransactionEvent.builder()
-                            .transactionId(UUID.randomUUID())
-                            .senderId(sender.getId())
-                            .receiverId(receiver.getId())
-                            .amount(amount)
-                            .status(transaction.getStatus())
-                            .timestamp(LocalDateTime.now())
-                            .build();
-
-            ObjectMapper mapper = new ObjectMapper();
-            String eventMessage = mapper.writeValueAsString(event);
-
-            paymentEventProducer.publishPaymentEvent(eventMessage);
-
-        } else {
-            transaction.setStatus(TransactionStatus.FAILED);
         }
 
         Transaction saved = transactionRepository.save(transaction);
         redisTemplate.opsForValue().set(idkey, saved.getId().toString(), 24, TimeUnit.HOURS);
+
+        TransactionEvent event = TransactionEvent.builder()
+                .transactionId(saved.getId())
+                .senderId(sender.getId())
+                .receiverId(receiver.getId())
+                .amount(amount)
+                .status(saved.getStatus())
+                .timestamp(saved.getTimestamp())
+                .build();
+
+        String eventMessage = objectMapper.writeValueAsString(event);
+        paymentEventProducer.publishPaymentEvent(eventMessage);
 
         return saved;
     }
