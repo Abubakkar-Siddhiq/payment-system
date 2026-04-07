@@ -1,4 +1,6 @@
 package com.paymentsystem.notificationservice.enums;
 
-public class TransactionStatus {
+public enum TransactionStatus {
+    SUCCESS,
+    FAILED,
 }
