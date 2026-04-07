@@ -22,5 +22,6 @@ public class TransactionResponse {
     private BigDecimal amount;
     private Currency currency;
     private TransactionStatus status;
-    private LocalDateTime createdAt;
+    private LocalDateTime timestamp;
+    private String message;
 }
