@@ -12,11 +12,11 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class FraudEventConsumer {
+public class FraudAlertEventConsumer {
 
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "fraud-topic", groupId = "payment-group")
+    @KafkaListener(topics = "fraud-alert-topic", groupId = "payment-group")
     public void consume(String message) {
         try {
             TransactionEvent event = objectMapper.readValue(message, TransactionEvent.class);
