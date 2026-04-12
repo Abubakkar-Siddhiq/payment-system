@@ -1,5 +1,6 @@
 package com.paymentsystem.paymentservice.domain.entity;
 
+import com.paymentsystem.paymentservice.domain.enums.Currency;
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,6 +38,10 @@ public class Transaction {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Currency currency;
 
     @Column(unique = true)
     private String idempotencyKey;
