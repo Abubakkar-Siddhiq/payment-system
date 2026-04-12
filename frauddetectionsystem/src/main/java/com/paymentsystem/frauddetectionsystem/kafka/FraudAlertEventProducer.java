@@ -14,7 +14,7 @@ public class FraudAlertEventProducer {
 
     public void publishFraudAlertEvent(String message) {
         log.info("Publishing payment event: {}", message);
-        kafkaTemplate.send("payment-topic", message);
+        kafkaTemplate.send("fraud-alert-topic", message);
     }
 }
 
