@@ -1,4 +1,5 @@
 package com.paymentsystem.paymentservice.domain.enums;
 
-public class AccountStatus {
+public enum AccountStatus {
+    ACTIVE, FROZEN
 }
