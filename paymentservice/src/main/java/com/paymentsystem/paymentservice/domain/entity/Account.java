@@ -1,5 +1,6 @@
 package com.paymentsystem.paymentservice.domain.entity;
 
+import com.paymentsystem.paymentservice.domain.enums.AccountStatus;
 import com.paymentsystem.paymentservice.domain.enums.Currency;
 
 import jakarta.persistence.*;
@@ -30,6 +31,9 @@ public class Account {
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
+
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
