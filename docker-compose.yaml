@@ -43,10 +43,10 @@ services:
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
 
   fraud-db:
-    image: postgres:latest
+    image: 'bitnami/postgresql:latest'
     environment:
       POSTGRES_DB: frauddb
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: changeme
     ports:
       - "5433:5432"
