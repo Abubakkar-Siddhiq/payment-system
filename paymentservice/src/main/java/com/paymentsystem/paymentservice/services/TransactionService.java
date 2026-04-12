@@ -2,6 +2,7 @@ package com.paymentsystem.paymentservice.services;
 
 import com.paymentsystem.paymentservice.domain.entity.Account;
 import com.paymentsystem.paymentservice.domain.entity.Transaction;
+import com.paymentsystem.paymentservice.domain.enums.AccountStatus;
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import com.paymentsystem.paymentservice.exception.PaymentException;
 import com.paymentsystem.paymentservice.kafka.PaymentEventProducer;
@@ -46,7 +47,11 @@ public class TransactionService {
             }
 
             return transactionRepository.findById(UUID.fromString(value))
-                    .orElseThrow();
+                    .orElseThrow(() -> new PaymentException("Transaction not Found."));
+        }
+
+        if(senderId.equals(receiverId)) {
+            throw new PaymentException("Sender and Reciever can't be same");
         }
 
         Account sender = accountRepository.findByIdWithLock(senderId)
@@ -54,14 +59,21 @@ public class TransactionService {
         Account receiver = accountRepository.findByIdWithLock(receiverId)
                 .orElseThrow(() -> new PaymentException("Receiver account not found"));
 
+        if(sender.getStatus() == AccountStatus.FROZEN) {
+            throw new PaymentException("Sender account is Frozen");
+        }
+
+        if(receiver.getStatus() == AccountStatus.FROZEN) {
+            throw new PaymentException("Sender account is Frozen");
+        }
+
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setSender(sender);
         transaction.setReceiver(receiver);
 
-        if(sender.getCurrency() != receiver.getCurrency()) {
-            throw new PaymentException("Currency mismatch.");
-        }
+        if(sender.getCurrency() != receiver.getCurrency()) throw new PaymentException("Currency mismatch.");
+        else transaction.setCurrency(sender.getCurrency());
 
         if (sender.getBalance().compareTo(amount) < 0) {
             transaction.setStatus(TransactionStatus.FAILED);
@@ -85,6 +97,7 @@ public class TransactionService {
                 .receiverId(receiver.getId())
                 .amount(amount)
                 .status(saved.getStatus())
+                .currency(saved.getCurrency())
                 .timestamp(saved.getTimestamp())
                 .build();
 
@@ -92,5 +105,36 @@ public class TransactionService {
         paymentEventProducer.publishPaymentEvent(eventMessage);
 
         return saved;
+    }
+
+    @Transactional
+    public void reverseTransaction(UUID transactionId) {
+        Transaction original = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new PaymentException("Transaction not found"));
+
+        Account sender = accountRepository.findByIdWithLock(original.getSender().getId())
+                .orElseThrow();
+        Account receiver = accountRepository.findByIdWithLock(original.getReceiver().getId())
+                .orElseThrow();
+
+        // Reverse the money
+        sender.setBalance(sender.getBalance().add(original.getAmount()));
+        receiver.setBalance(receiver.getBalance().subtract(original.getAmount()));
+
+        // Freeze sender
+        sender.setStatus(AccountStatus.FROZEN);
+
+        accountRepository.save(sender);
+        accountRepository.save(receiver);
+
+        // Create reversal record in ledger
+        Transaction reversal = new Transaction();
+        reversal.setSender(original.getReceiver()); // flipped
+        reversal.setReceiver(original.getSender()); // flipped
+        reversal.setAmount(original.getAmount());
+        reversal.setStatus(TransactionStatus.REVERSED);
+        reversal.setCurrency(original.getCurrency());
+
+        transactionRepository.save(reversal);
     }
 }
