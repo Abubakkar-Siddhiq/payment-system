@@ -1,5 +1,6 @@
 package com.paymentsystem.paymentservice.kafka.event;
 
+import com.paymentsystem.paymentservice.domain.enums.Currency;
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import lombok.Builder;
 import lombok.Data;
@@ -17,4 +18,5 @@ public class TransactionEvent {
     private BigDecimal amount;
     private TransactionStatus status;
     private LocalDateTime timestamp;
+    private Currency currency;
 }
