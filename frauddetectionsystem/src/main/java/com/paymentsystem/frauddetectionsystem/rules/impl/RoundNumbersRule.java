@@ -20,7 +20,7 @@ public class RoundNumbersRule implements FraudRule {
                     .transactionId(event.getTransactionId())
                     .amount(event.getAmount())
                     .reason("Suspicious Large Transaction")
-                    .riskLevel(RiskLevel.HIGH)
+                    .riskLevel(RiskLevel.LOW)
                     .detectedAt(event.getTimestamp())
                     .build());
         }
