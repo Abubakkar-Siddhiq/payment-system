@@ -1,4 +1,11 @@
 package com.paymentsystem.frauddetectionsystem.domain.enums;
 
-public class Currency {
+public enum Currency {
+    USD,
+    EUR,
+    GBP,
+    JPY,
+    CAD,
+    AUD,
+    CHF
 }
