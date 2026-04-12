@@ -1,5 +1,6 @@
 package com.paymentsystem.frauddetectionsystem.kafka.event;
 
+import com.paymentsystem.frauddetectionsystem.domain.enums.Currency;
 import com.paymentsystem.frauddetectionsystem.domain.enums.TransactionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,4 +22,5 @@ public class TransactionEvent {
     private BigDecimal amount;
     private TransactionStatus status;
     private LocalDateTime timestamp;
+    private Currency currency;
 }
