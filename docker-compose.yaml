@@ -50,3 +50,12 @@ services:
       POSTGRES_PASSWORD: changeme
     ports:
       - "5433:5432"
+
+  auth-db:
+    image: 'bitnami/postgresql:latest'
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: changeme
+    ports:
+      - "5434:5432"
