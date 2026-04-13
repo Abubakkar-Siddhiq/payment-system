@@ -64,7 +64,7 @@ public class TransactionService {
         }
 
         if(receiver.getStatus() == AccountStatus.FROZEN) {
-            throw new PaymentException("Sender account is Frozen");
+            throw new PaymentException("Receiver account is Frozen");
         }
 
         Transaction transaction = new Transaction();
@@ -76,7 +76,6 @@ public class TransactionService {
         else transaction.setCurrency(sender.getCurrency());
 
         if (sender.getBalance().compareTo(amount) < 0) {
-            transaction.setStatus(TransactionStatus.FAILED);
             throw new PaymentException("Insufficient Balance");
         } else {
             sender.setBalance(sender.getBalance().subtract(amount));
