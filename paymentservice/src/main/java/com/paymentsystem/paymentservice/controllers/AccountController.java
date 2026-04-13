@@ -54,10 +54,11 @@ public class AccountController {
     @PostMapping(path = "/{id}/deposit")
     public ResponseEntity<AccountResponse> deposit(
             @PathVariable UUID id,
+            @RequestHeader("Idempotency-Key") String idkey,
             @RequestBody DepositRequestDto depositRequestDto
             ) {
         DepositRequest depositRequest = accountMapper.toDepositRequest(depositRequestDto);
-        Account account = accountService.deposit(id, depositRequest.getAmount());
+        Account account = accountService.deposit(id, depositRequest.getAmount(), idkey);
         AccountResponse res = accountMapper.toAccountResponse(account);
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
