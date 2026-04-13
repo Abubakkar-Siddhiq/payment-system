@@ -4,6 +4,7 @@ import com.paymentsystem.paymentservice.domain.dtos.request.AccountRequest;
 import com.paymentsystem.paymentservice.domain.dtos.request.CreateAccountRequestDto;
 import com.paymentsystem.paymentservice.domain.dtos.request.DepositRequest;
 import com.paymentsystem.paymentservice.domain.dtos.request.DepositRequestDto;
+import com.paymentsystem.paymentservice.domain.dtos.response.AccountBalanceResponse;
 import com.paymentsystem.paymentservice.domain.dtos.response.AccountResponse;
 import com.paymentsystem.paymentservice.domain.entity.Account;
 import com.paymentsystem.paymentservice.mappers.AccountMapper;
@@ -14,7 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,5 +60,14 @@ public class AccountController {
         Account account = accountService.deposit(id, depositRequest.getAmount());
         AccountResponse res = accountMapper.toAccountResponse(account);
         return new ResponseEntity<>(res, HttpStatus.CREATED);
+    }
+
+    @GetMapping(path = "/{id}/balance")
+    public ResponseEntity<AccountBalanceResponse> getBalance(
+            @PathVariable UUID id
+    ) {
+        Account account = accountService.getAccountById(id);
+        AccountBalanceResponse res = accountMapper.toAccountBalanceResponse(account);
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }

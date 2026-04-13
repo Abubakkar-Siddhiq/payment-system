@@ -4,6 +4,7 @@ import com.paymentsystem.paymentservice.domain.dtos.request.AccountRequest;
 import com.paymentsystem.paymentservice.domain.dtos.request.CreateAccountRequestDto;
 import com.paymentsystem.paymentservice.domain.dtos.request.DepositRequest;
 import com.paymentsystem.paymentservice.domain.dtos.request.DepositRequestDto;
+import com.paymentsystem.paymentservice.domain.dtos.response.AccountBalanceResponse;
 import com.paymentsystem.paymentservice.domain.dtos.response.AccountResponse;
 import com.paymentsystem.paymentservice.domain.entity.Account;
 import org.mapstruct.Mapper;
@@ -14,4 +15,5 @@ public interface AccountMapper {
     AccountResponse toAccountResponse(Account account);
     AccountRequest toAccountRequest(CreateAccountRequestDto createAccountRequestDto);
     DepositRequest toDepositRequest(DepositRequestDto depositRequestDto);
+    AccountBalanceResponse toAccountBalanceResponse(Account account);
 }
