@@ -44,6 +44,11 @@ public class KafkaConfig {
     }
 
     @Bean
+    public NewTopic userRegisteredTopic() {
+        return TopicBuilder.name("user-registered-topic").partitions(1).replicas(1).build();
+    }
+
+    @Bean
     public NewTopic fraudAlertTopic() {
         return TopicBuilder.name("fraud-alert-topic").partitions(1).replicas(1).build();
     }

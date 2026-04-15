@@ -5,7 +5,7 @@ import com.paymentsystem.paymentservice.domain.entity.Transaction;
 import com.paymentsystem.paymentservice.domain.enums.AccountStatus;
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import com.paymentsystem.paymentservice.exception.PaymentException;
-import com.paymentsystem.paymentservice.kafka.PaymentEventProducer;
+import com.paymentsystem.paymentservice.kafka.producers.PaymentEventProducer;
 import com.paymentsystem.paymentservice.kafka.event.TransactionEvent;
 import com.paymentsystem.paymentservice.repositories.AccountRepository;
 import com.paymentsystem.paymentservice.repositories.TransactionRepository;

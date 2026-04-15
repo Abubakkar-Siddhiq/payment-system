@@ -41,15 +41,15 @@ public class AccountController {
         return ResponseEntity.ok(res);
     }
 
-    @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(
-            @Valid @RequestBody CreateAccountRequestDto createAccountRequestDto
-            ) {
-        AccountRequest accountRequest = accountMapper.toAccountRequest(createAccountRequestDto);
-        Account account = accountService.createAccount(accountRequest.getOwner(), accountRequest.getCurrency());
-        AccountResponse res = accountMapper.toAccountResponse(account);
-        return new ResponseEntity<>(res, HttpStatus.CREATED);
-    }
+//    @PostMapping
+//    public ResponseEntity<AccountResponse> createAccount(
+//            @Valid @RequestBody CreateAccountRequestDto createAccountRequestDto
+//            ) {
+//        AccountRequest accountRequest = accountMapper.toAccountRequest(createAccountRequestDto);
+//        Account account = accountService.createAccount(accountRequest.getOwner(), accountRequest.getCurrency());
+//        AccountResponse res = accountMapper.toAccountResponse(account);
+//        return new ResponseEntity<>(res, HttpStatus.CREATED);
+//    }
 
     @PostMapping(path = "/{id}/deposit")
     public ResponseEntity<AccountResponse> deposit(

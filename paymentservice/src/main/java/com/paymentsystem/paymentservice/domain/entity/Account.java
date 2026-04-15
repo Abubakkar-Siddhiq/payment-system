@@ -44,8 +44,8 @@ public class Account {
 
     @PrePersist
     protected void onCreate() {
+        this.status = AccountStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
         this.balance = BigDecimal.valueOf(0);
-        this.number = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
     }
 }

@@ -1,4 +1,4 @@
-package com.paymentsystem.paymentservice.kafka;
+package com.paymentsystem.paymentservice.kafka.producers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

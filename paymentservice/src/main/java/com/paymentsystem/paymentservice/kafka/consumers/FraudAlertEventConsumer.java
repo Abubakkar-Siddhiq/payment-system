@@ -1,11 +1,9 @@
-package com.paymentsystem.paymentservice.kafka;
+package com.paymentsystem.paymentservice.kafka.consumers;
 
 import com.paymentsystem.paymentservice.domain.FraudAlert;
 import com.paymentsystem.paymentservice.domain.enums.RiskLevel;
-import com.paymentsystem.paymentservice.kafka.event.TransactionEvent;
 
 import com.paymentsystem.paymentservice.services.TransactionService;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

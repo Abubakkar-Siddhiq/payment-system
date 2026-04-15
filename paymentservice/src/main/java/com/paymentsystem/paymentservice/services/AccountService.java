@@ -33,11 +33,14 @@ public class AccountService {
 
 
 
-    public Account createAccount(String owner, Currency currency) {
+    public void createAccount(UUID id, String owner, Currency currency) {
+        if(accountRepository.findById(id).isPresent()) return;
+
         Account account = new Account();
+        account.setId(id);
         account.setOwner(owner);
         account.setCurrency(currency);
-        return accountRepository.save(account);
+        accountRepository.save(account);
     }
 
     @Transactional
