@@ -26,22 +26,22 @@ public class SecurityConfig {
         return new JwtAuthenticationFilter(authenticationService);
     }
 
-    @Bean
-    public UserDetailsService userDetailsService(UserRepository userRepository) {
-        AuthUserDetailsService blogUserDetailsService = new AuthUserDetailsService(userRepository);
-
-        String email = "user@test.com";
-        userRepository.findByEmail(email).orElseGet(() -> {
-            User newUser = User.builder().name("Test User")
-                    .email(email)
-                    .password(passwordEncoder().encode("password"))
-                    .build();
-
-            return userRepository.save(newUser);
-        });
-
-        return blogUserDetailsService;
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService(UserRepository userRepository) {
+//        AuthUserDetailsService blogUserDetailsService = new AuthUserDetailsService(userRepository);
+//
+//        String email = "user@test.com";
+//        userRepository.findByEmail(email).orElseGet(() -> {
+//            User newUser = User.builder().name("Test User")
+//                    .email(email)
+//                    .password(passwordEncoder().encode("password"))
+//                    .build();
+//
+//            return userRepository.save(newUser);
+//        });
+//
+//        return blogUserDetailsService;
+//    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(

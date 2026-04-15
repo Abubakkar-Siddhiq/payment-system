@@ -1,5 +1,11 @@
 package com.paymentsystem.authservice.service;
 
+import com.paymentsystem.authservice.domain.entity.User;
+import com.paymentsystem.authservice.domain.enums.Currency;
+import com.paymentsystem.authservice.kafka.event.UserRegisterdProducer;
+import com.paymentsystem.authservice.kafka.event.UserRegisteredEvent;
+import com.paymentsystem.authservice.mappers.UserMapper;
+import com.paymentsystem.authservice.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -11,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -21,20 +28,18 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final UserRegisterdProducer userRegisterdProducer;
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    private final Long jwtExpiryMs = 86400000L; // 24hrs
-
-    public UserDetails authenticate(String email, String password) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
-        return userDetailsService.loadUserByUsername(email);
-    }
+    private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
+    private final UserMapper userMapper;
 
     public String generateToken(UserDetails userDetails) {
+        // 24hrs
+        long jwtExpiryMs = 86400000L;
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -62,5 +67,26 @@ public class AuthService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public UserDetails authenticate(String email, String password) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
+        );
+        return userDetailsService.loadUserByUsername(email);
+    }
+
+    public UserDetails register(String name, String email, String password, Currency currency) {
+        User user = new User();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setCurrency(currency);
+        User saved = userRepository.save(user);
+
+        UserRegisteredEvent event = userMapper.toUserRegisteredEvent(saved);
+        String eventMsg = objectMapper.writeValueAsString(event);
+        userRegisterdProducer.publishEvent(eventMsg);
+
+        return userDetailsService.loadUserByUsername(email);
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.paymentsystem.authservice.domain.entity;
 
+import com.paymentsystem.authservice.domain.enums.Currency;
 import com.paymentsystem.authservice.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
-@Table
+@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -33,6 +34,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role; // USER, ADMIN
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Currency currency;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
