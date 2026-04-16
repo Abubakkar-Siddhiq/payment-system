@@ -5,6 +5,8 @@ import com.paymentsystem.paymentservice.exception.PaymentException;
 import com.paymentsystem.paymentservice.repositories.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountService {
@@ -34,13 +37,23 @@ public class AccountService {
 
 
     public void createAccount(UUID id, String owner, Currency currency) {
-        if(accountRepository.findById(id).isPresent()) return;
+        if(accountRepository.existsById(id)) {
+            log.info("Account already exits");
+            return;
+        }
 
-        Account account = new Account();
-        account.setId(id);
-        account.setOwner(owner);
-        account.setCurrency(currency);
-        accountRepository.save(account);
+        try {
+            Account account = new Account();
+            account.setId(id);
+            account.setOwner(owner);
+            account.setCurrency(currency);
+            accountRepository.save(account);
+
+            log.info("Account Created {}", account);
+        }
+        catch (DataIntegrityViolationException e) {
+            log.warn("Account already exists for user: {}", id);
+        }
     }
 
     @Transactional

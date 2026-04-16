@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @Builder
 public class UserRegisteredEvent {
-    private UUID userId;
+    private UUID id;
     private String name;
     private String email;
     private Currency currency;

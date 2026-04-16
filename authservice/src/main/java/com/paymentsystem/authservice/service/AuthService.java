@@ -12,6 +12,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -75,18 +76,39 @@ public class AuthService {
     }
 
     public UserDetails register(String name, String email, String password, Currency currency) {
-        User user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(password);
-        user.setCurrency(currency);
-        User saved = userRepository.save(user);
 
-        UserRegisteredEvent event = userMapper.toUserRegisteredEvent(saved);
-        String eventMsg = objectMapper.writeValueAsString(event);
-        userRegisterdProducer.publishEvent(eventMsg);
+        // Normalize email (important)
+        email = email.toLowerCase().trim();
 
-        return userDetailsService.loadUserByUsername(email);
+        // 1. Check if user already exists
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("User already exists with email: " + email);
+        }
+
+        try {
+            // 2. Create user
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setPassword(password);
+            user.setCurrency(currency);
+
+            User saved = userRepository.save(user);
+
+            // 3. Publish event
+            UserRegisteredEvent event = userMapper.toUserRegisteredEvent(saved);
+            String eventMsg = objectMapper.writeValueAsString(event);
+            userRegisterdProducer.publishEvent(eventMsg);
+
+            // 4. Return user details
+            return userDetailsService.loadUserByUsername(email);
+
+        } catch (DataIntegrityViolationException e) {
+            // Handles race condition (2 requests at same time)
+            throw new RuntimeException("User already exists with email: " + email);
+        } catch (Exception e) {
+            throw new RuntimeException("Registration failed", e);
+        }
     }
 
 }

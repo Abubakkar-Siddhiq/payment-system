@@ -20,10 +20,9 @@ import java.util.UUID;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String number;
 
     @Column(nullable = false)
@@ -47,5 +46,6 @@ public class Account {
         this.status = AccountStatus.ACTIVE;
         this.createdAt = LocalDateTime.now();
         this.balance = BigDecimal.valueOf(0);
+        this.number = "ACC-" + UUID.randomUUID().toString().substring(0, 10).toUpperCase();
     }
 }

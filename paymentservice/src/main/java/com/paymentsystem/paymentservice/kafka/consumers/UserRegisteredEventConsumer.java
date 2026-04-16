@@ -28,9 +28,9 @@ public class UserRegisteredEventConsumer {
                     event.getCurrency(),
                     event.getEmail()
             );
-            accountService.createAccount(event.getUserId(), event.getName(), event.getCurrency());
+            accountService.createAccount(event.getId(), event.getName(), event.getCurrency());
         } catch (Exception e) {
-            log.error("Failed to process fraud alert: {}", e.getMessage());
+            log.error("Failed to process user registration: {}", e.getMessage());
         }
     }
 }
