@@ -19,9 +19,9 @@ spring:
             - Path=/api/payments/**,/api/accounts/**
 
         - id: fraud-service
-          uri: http://localhost:8084
+          uri: http://localhost:8083
           predicates:
             - Path=/api/fraud/**
 
 jwt:
-  secret: your-base64-encoded-secret-key-here
+  secret: 2Qj3ZpP1QqWn5J6c6h1s7Q9sQ3k8Xb9mF4yJc0rP2tU=
