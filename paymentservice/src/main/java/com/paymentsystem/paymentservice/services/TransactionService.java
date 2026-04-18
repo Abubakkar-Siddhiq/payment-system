@@ -7,7 +7,9 @@ import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import com.paymentsystem.paymentservice.exception.PaymentException;
 import com.paymentsystem.paymentservice.kafka.producers.PaymentEventProducer;
 import com.paymentsystem.paymentservice.kafka.event.TransactionEvent;
+import com.paymentsystem.paymentservice.outbox.OutboxEvent;
 import com.paymentsystem.paymentservice.repositories.AccountRepository;
+import com.paymentsystem.paymentservice.repositories.OutboxEventRepository;
 import com.paymentsystem.paymentservice.repositories.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,8 +29,8 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
-    private final PaymentEventProducer paymentEventProducer;
     private final ObjectMapper objectMapper;
+    private final OutboxEventRepository outboxEventRepository;
 
     @Transactional
     public Transaction processPayment(UUID senderId, UUID receiverId, BigDecimal amount, String idkey) {
@@ -101,7 +103,10 @@ public class TransactionService {
                 .build();
 
         String eventMessage = objectMapper.writeValueAsString(event);
-        paymentEventProducer.publishPaymentEvent(eventMessage);
+
+        OutboxEvent outboxEvent = new OutboxEvent();
+        outboxEvent.setPayload(eventMessage);
+        outboxEventRepository.save(outboxEvent);
 
         return saved;
     }
