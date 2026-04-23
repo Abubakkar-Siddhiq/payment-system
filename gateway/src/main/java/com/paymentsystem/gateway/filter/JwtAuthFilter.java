@@ -2,6 +2,8 @@ package com.paymentsystem.gateway.filter;
 
 import com.paymentsystem.gateway.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -11,19 +13,25 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter implements WebFilter {
 
     private final JwtUtil jwtUtil;
 
+    @Value("${api_prefix}")
+    private String API_PREFIX;
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().toString();
+        log.info("Request path: {}", path);
 
         // Skip auth for public routes
-        if (path.startsWith("/api/auth")) {
+        if (path.startsWith(API_PREFIX + "/auth")) {
+            log.info("IF BLOCK EXEC!!!");
             return chain.filter(exchange);
         }
 
@@ -43,12 +51,6 @@ public class JwtAuthFilter implements WebFilter {
 
         String userId = jwtUtil.extractUserId(token);
         String role = jwtUtil.extractRole(token);
-
-        // Admin only for fraud routes
-        if (path.startsWith("/api/fraud") && !"ADMIN".equals(role)) {
-            exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-            return exchange.getResponse().setComplete();
-        }
 
         ServerHttpRequest modifiedRequest = request.mutate()
                 .header("X-User-Id", userId)
