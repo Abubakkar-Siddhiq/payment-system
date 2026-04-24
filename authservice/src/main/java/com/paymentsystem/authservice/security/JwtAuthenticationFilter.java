@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -24,34 +25,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try {
-            String token = extractToken(request);
-            if(token != null) {
+
+        String token = extractToken(request);
+
+        if (token != null) {
+            try {
                 UserDetails userDetails = authenticationService.validateToken(token);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
+                // Avoid overwriting existing authentication
+                if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                if(userDetails instanceof com.paymentsystem.authservice.security.AuthUserDetails) {
-                    request.setAttribute("userId", ((com.paymentsystem.authservice.security.AuthUserDetails) userDetails).getId());
+                    // Optional but recommended
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
+
+                // Attach userId if available
+                if (userDetails instanceof com.paymentsystem.authservice.security.AuthUserDetails user) {
+                    request.setAttribute("userId", user.getId());
+                }
+
+            } catch (Exception ex) {
+                log.warn("Received invalid auth token", ex);
+                SecurityContextHolder.clearContext();
+                // Optional: you could return 401 here instead of continuing
+                // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token");
+                // return;
             }
-        } catch (Exception ex) {
-            log.warn("Recieved Invalid Auth token " + ex);
         }
 
         filterChain.doFilter(request, response);
-
     }
 
     private String extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
-        if(bearerToken != null && bearerToken.startsWith("Bearer")) {
+
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
 
