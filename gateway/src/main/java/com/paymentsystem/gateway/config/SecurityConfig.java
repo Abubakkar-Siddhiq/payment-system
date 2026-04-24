@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers(API_PREFIX + "/auth/**").permitAll()
                         .pathMatchers(API_PREFIX + "/fraud/**").hasRole("ADMIN")
-                        .anyExchange().authenticated()
+                        .anyExchange().permitAll()
                 )
                 .addFilterAt(jwtAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
