@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(path = "/api/v1/fraud/alerts")
+@RequestMapping(path = "/fraud/alerts")
 @RequiredArgsConstructor
 public class FraudController {
 
@@ -33,7 +33,9 @@ public class FraudController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FraudAlertResponse> getAlert(@PathVariable UUID id) {
+    public ResponseEntity<FraudAlertResponse> getAlert(
+            @PathVariable UUID id
+    ) {
 
         return fraudAlertRepository.findById(id)
                 .map(fraudAlertMapper::toFraudAlertResponse)
