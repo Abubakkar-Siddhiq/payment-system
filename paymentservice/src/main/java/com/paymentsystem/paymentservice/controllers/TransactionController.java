@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/api/v1/payments")
+@RequestMapping(path = "/payments")
 @RequiredArgsConstructor
 public class TransactionController {
 
@@ -24,8 +24,13 @@ public class TransactionController {
     @PostMapping
     public ResponseEntity<TransactionResponse> createPayment(
             @RequestHeader("Idempotency-Key") String idkey,
+            @RequestHeader("X-User-Id") String userId,
             @Valid  @RequestBody TransactionRequestDto transactionRequestDto
     ) {
+
+        if (!transactionRequestDto.getSender().toString().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         TransactionRequest transactionRequest = transactionMapper.toTransactionRequest(transactionRequestDto);
 
