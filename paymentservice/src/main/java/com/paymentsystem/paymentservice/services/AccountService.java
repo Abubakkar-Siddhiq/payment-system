@@ -30,11 +30,10 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
+    @Transactional
     public Account getAccountById(UUID id) {
         return accountRepository.findByIdWithLock(id).orElseThrow(() -> new EntityNotFoundException("Account Not Found: "+ id));
     }
-
-
 
     public void createAccount(UUID id, String owner, Currency currency) {
         if(accountRepository.existsById(id)) {
@@ -76,7 +75,8 @@ public class AccountService {
                     .orElseThrow(() -> new PaymentException("Account not found"));
         }
 
-        Account account = this.getAccountById(id);
+        Account account = accountRepository.findByIdWithLock(id)
+                .orElseThrow(() -> new PaymentException("Account not found"));
         account.setBalance(account.getBalance().add(amount));
         Account saved = accountRepository.save(account);
 
