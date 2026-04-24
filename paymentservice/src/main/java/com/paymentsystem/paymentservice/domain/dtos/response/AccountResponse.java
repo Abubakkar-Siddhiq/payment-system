@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,6 +18,7 @@ public class AccountResponse {
     private UUID id;
     private String owner;
     private String number;
+    private BigDecimal balance;
     private Currency currency;
     private LocalDateTime createdAt;
 }
