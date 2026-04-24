@@ -53,6 +53,8 @@ public class JwtAuthFilter implements WebFilter {
         String role = jwtUtil.extractRole(token);
 
         ServerHttpRequest modifiedRequest = request.mutate()
+                .headers(headers -> headers.remove("X-User-Id"))
+                .headers(headers -> headers.remove("X-User-Role"))
                 .header("X-User-Id", userId)
                 .header("X-User-Role", role)
                 .build();
