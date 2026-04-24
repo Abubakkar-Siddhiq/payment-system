@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(path = "/api/v1/auth")
+@RequestMapping(path = "/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authenticationService;
@@ -23,8 +23,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(
             @RequestBody LoginRequest loginRequest
     ) {
-        UserDetails userDetails = authenticationService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        String tokenValue =  authenticationService.generateToken(userDetails);
+        User user = authenticationService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        String tokenValue =  authenticationService.generateToken(user);
 
         AuthResponse authResponse =AuthResponse.builder()
                 .token(tokenValue)
@@ -38,8 +38,8 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(
             @RequestBody RegisterRequest registerRequest
     ) {
-        UserDetails userDetails = authenticationService.register(registerRequest.getName(), registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getCurrency());
-        String tokenValue =  authenticationService.generateToken(userDetails);
+        User user = authenticationService.register(registerRequest.getName(), registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getCurrency());
+        String tokenValue =  authenticationService.generateToken(user);
 
         AuthResponse authResponse =AuthResponse.builder()
                 .token(tokenValue)
