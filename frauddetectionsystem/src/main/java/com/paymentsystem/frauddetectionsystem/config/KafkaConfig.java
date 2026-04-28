@@ -16,6 +16,11 @@ public class KafkaConfig {
     }
 
     @Bean
+    public NewTopic fraudReviewTopic() { // Approve / Reject
+        return TopicBuilder.name("fraud-review-topic").partitions(1).replicas(1).build();
+    }
+
+    @Bean
     public NewTopic paymentTopic() {
         return TopicBuilder.name("payment-topic").partitions(1).replicas(1).build();
     }
