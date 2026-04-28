@@ -1,5 +1,6 @@
 package com.paymentsystem.frauddetectionsystem.domain.entity;
 
+import com.paymentsystem.frauddetectionsystem.domain.enums.FraudStatus;
 import com.paymentsystem.frauddetectionsystem.domain.enums.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,7 +27,12 @@ public class FraudAlert {
     private String reason;
 
     @Enumerated(EnumType.STRING)
+    private FraudStatus status;
+
+    @Enumerated(EnumType.STRING)
     private RiskLevel riskLevel; // LOW, MEDIUM, HIGH
 
     private LocalDateTime detectedAt;
+    private LocalDateTime reviewedAt;
+    private UUID reviewedBy;
 }
