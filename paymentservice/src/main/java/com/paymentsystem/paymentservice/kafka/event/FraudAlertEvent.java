@@ -1,4 +1,4 @@
-package com.paymentsystem.paymentservice.domain;
+package com.paymentsystem.paymentservice.kafka.event;
 
 import com.paymentsystem.paymentservice.domain.enums.RiskLevel;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FraudAlert {
+public class FraudAlertEvent {
     private UUID id;
     private UUID transactionId;
     private UUID senderId;

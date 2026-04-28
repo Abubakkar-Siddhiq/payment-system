@@ -1,6 +1,6 @@
 package com.paymentsystem.paymentservice.kafka.consumers;
 
-import com.paymentsystem.paymentservice.domain.FraudAlert;
+import com.paymentsystem.paymentservice.kafka.event.FraudAlertEvent;
 import com.paymentsystem.paymentservice.domain.enums.RiskLevel;
 
 import com.paymentsystem.paymentservice.services.TransactionService;
@@ -23,13 +23,14 @@ public class FraudAlertEventConsumer {
     public void consume(String message) {
         log.info("FRAUD ALERT: {}", message);
         try {
-            FraudAlert alert = objectMapper.readValue(message, FraudAlert.class);
+            FraudAlertEvent alert = objectMapper.readValue(message, FraudAlertEvent.class);
             log.info("Fraud alert received - Transaction: {} Sender: {} Risk: {}",
                     alert.getTransactionId(), alert.getSenderId(), alert.getRiskLevel());
 
             if(alert.getRiskLevel() == RiskLevel.HIGH) {
-                transactionService.reverseTransaction(alert.getTransactionId());
-                log.info("Transaction {} reversed and account frozen", alert.getTransactionId());
+                transactionService.freezeAccount(alert.getTransactionId());
+                // Reversal is done upon review by the Admin. A human in the loop for now. Real world systems use AI.
+                log.info("Transaction {} - Sender's account Frozen", alert.getTransactionId());
             }
 
         } catch (Exception e) {
