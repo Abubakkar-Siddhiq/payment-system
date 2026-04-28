@@ -24,7 +24,7 @@ public class AccountController {
     private final AccountMapper accountMapper;
 
     @GetMapping
-    public ResponseEntity<List<AccountResponse>> listAccounts(
+    public ResponseEntity<List<Account>> listAccounts(
             @RequestHeader("X-User-Role") String role
     ) {
 
@@ -32,7 +32,7 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<AccountResponse> accounts = accountService.listAccounts().stream().map(accountMapper::toAccountResponse).toList();
+        List<Account> accounts = accountService.listAccounts();
         return ResponseEntity.ok(accounts);
     }
 
