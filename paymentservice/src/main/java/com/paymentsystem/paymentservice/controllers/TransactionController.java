@@ -27,11 +27,6 @@ public class TransactionController {
             @RequestHeader("X-User-Id") String userId,
             @Valid  @RequestBody TransactionRequestDto transactionRequestDto
     ) {
-
-        if (!transactionRequestDto.getSender().toString().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
         TransactionRequest transactionRequest = transactionMapper.toTransactionRequest(transactionRequestDto);
 
         if(transactionRequest.getSender() == null || transactionRequest.getReceiver() == null) {
@@ -42,7 +37,8 @@ public class TransactionController {
                 transactionRequest.getSender(),
                 transactionRequest.getReceiver(),
                 transactionRequest.getAmount(),
-                idkey
+                idkey,
+                userId
         );
 
         TransactionResponse res = transactionMapper.toTransactionResponse(transaction);

@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -16,11 +15,11 @@ import java.util.UUID;
 @Builder
 public class TransactionRequestDto {
 
-    @NotNull(message = "Sender is required")
-    private UUID sender;
+    @NotNull(message = "Sender account number is required")
+    private String sender;
 
-    @NotNull(message = "Receiver is required")
-    private UUID receiver;
+    @NotNull(message = "Receiver account number is required")
+    private String receiver;
 
     @NotNull @Positive(message = "Amount is required")
     private BigDecimal amount;

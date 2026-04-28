@@ -8,15 +8,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class TransactionRequest {
-    private UUID sender;
-    private UUID receiver;
+    private String sender; // Sender Account number
+    private String receiver; // Receiver Account number
     private BigDecimal amount;
     private Currency currency;
 }

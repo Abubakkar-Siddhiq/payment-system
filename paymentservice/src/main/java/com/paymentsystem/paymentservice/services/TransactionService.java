@@ -33,7 +33,7 @@ public class TransactionService {
     private final OutboxEventRepository outboxEventRepository;
 
     @Transactional
-    public Transaction processPayment(UUID senderId, UUID receiverId, BigDecimal amount, String idkey) {
+    public Transaction processPayment(String senderNo, String receiverNo, BigDecimal amount, String idkey, String userId) {
         Boolean locked = redisTemplate.opsForValue()
                 .setIfAbsent(idkey, "PROCESSING", 10, TimeUnit.MINUTES);
 
@@ -52,14 +52,18 @@ public class TransactionService {
                     .orElseThrow(() -> new PaymentException("Transaction not Found."));
         }
 
-        if(senderId.equals(receiverId)) {
+        if(senderNo.equals(receiverNo)) {
             throw new PaymentException("Sender and Reciever can't be same");
         }
 
-        Account sender = accountRepository.findByIdWithLock(senderId)
+        Account sender = accountRepository.findByNumberWithLock(senderNo)
                 .orElseThrow(() -> new PaymentException("Sender account not found"));
-        Account receiver = accountRepository.findByIdWithLock(receiverId)
+        Account receiver = accountRepository.findByNumberWithLock(receiverNo)
                 .orElseThrow(() -> new PaymentException("Receiver account not found"));
+
+        if (!sender.getId().toString().equals(userId)) {
+            throw new PaymentException("Unauthorized - account does not belong to you");
+        }
 
         if(sender.getStatus() == AccountStatus.FROZEN) {
             throw new PaymentException("Sender account is Frozen");
