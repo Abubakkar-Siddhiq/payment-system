@@ -46,7 +46,7 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Account account = accountService.getAccountById(id);
+        Account account = accountService.getAccountByIdWithLock(id);
         AccountResponse res = accountMapper.toAccountResponse(account);
         return ResponseEntity.ok(res);
     }
@@ -71,5 +71,14 @@ public class AccountController {
     ) {
         AccountBalanceResponse res = accountService.getBalance(accountNumber, userId);
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/me")
+    public ResponseEntity<AccountResponse> getMeInfo(
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        Account account = accountService.getAccountById(UUID.fromString(userId));
+        AccountResponse res = accountMapper.toAccountResponse(account);
+        return ResponseEntity.ok(res);
     }
 }

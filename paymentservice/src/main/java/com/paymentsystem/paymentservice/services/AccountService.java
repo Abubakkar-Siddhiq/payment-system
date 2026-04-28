@@ -33,8 +33,12 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
-    @Transactional
     public Account getAccountById(UUID id) {
+        return accountRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Account Not Found: "+ id));
+    }
+
+    @Transactional
+    public Account getAccountByIdWithLock(UUID id) {
         return accountRepository.findByIdWithLock(id).orElseThrow(() -> new EntityNotFoundException("Account Not Found: "+ id));
     }
 
