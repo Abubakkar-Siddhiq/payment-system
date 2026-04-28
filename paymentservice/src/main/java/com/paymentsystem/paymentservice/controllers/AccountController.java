@@ -51,36 +51,25 @@ public class AccountController {
         return ResponseEntity.ok(res);
     }
 
-    @PostMapping(path = "/{id}/deposit")
+    @PostMapping(path = "/{accountNumber}/deposit")
     public ResponseEntity<AccountResponse> deposit(
-            @PathVariable UUID id,
+            @PathVariable String accountNumber,
             @RequestHeader("Idempotency-Key") String idkey,
             @RequestHeader("X-User-Id") String userId,
             @RequestBody DepositRequestDto depositRequestDto
             ) {
-
-        if (!id.toString().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
         DepositRequest depositRequest = accountMapper.toDepositRequest(depositRequestDto);
-        Account account = accountService.deposit(id, depositRequest.getAmount(), idkey);
+        Account account = accountService.deposit(accountNumber, depositRequest.getAmount(), idkey, userId);
         AccountResponse res = accountMapper.toAccountResponse(account);
         return new ResponseEntity<>(res, HttpStatus.CREATED);
     }
 
-    @GetMapping(path = "/{id}/balance")
+    @GetMapping(path = "/{accountNumber}/balance")
     public ResponseEntity<AccountBalanceResponse> getBalance(
-            @PathVariable UUID id,
+            @PathVariable String accountNumber,
             @RequestHeader("X-User-Id") String userId
     ) {
-
-        if (!id.toString().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        Account account = accountService.getAccountById(id);
-        AccountBalanceResponse res = accountMapper.toAccountBalanceResponse(account);
+        AccountBalanceResponse res = accountService.getBalance(accountNumber, userId);
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }

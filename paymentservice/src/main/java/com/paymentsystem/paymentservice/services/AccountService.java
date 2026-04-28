@@ -1,7 +1,9 @@
 package com.paymentsystem.paymentservice.services;
 
+import com.paymentsystem.paymentservice.domain.dtos.response.AccountBalanceResponse;
 import com.paymentsystem.paymentservice.domain.entity.Account;
 import com.paymentsystem.paymentservice.exception.PaymentException;
+import com.paymentsystem.paymentservice.mappers.AccountMapper;
 import com.paymentsystem.paymentservice.repositories.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final AccountMapper accountMapper;
     private final RedisTemplate<String, String> redisTemplate;
 
     public List<Account> listAccounts() {
@@ -56,7 +59,7 @@ public class AccountService {
     }
 
     @Transactional
-    public Account deposit(UUID id, BigDecimal amount, String idkey) {
+    public Account deposit(String accountNumber, BigDecimal amount, String idkey, String userId) {
         Boolean locked = redisTemplate.opsForValue()
                 .setIfAbsent(idkey, "PROCESSING", 10, TimeUnit.MINUTES);
 
@@ -75,8 +78,14 @@ public class AccountService {
                     .orElseThrow(() -> new PaymentException("Account not found"));
         }
 
-        Account account = accountRepository.findByIdWithLock(id)
+
+        Account account = accountRepository.findByNumberWithLock(accountNumber)
                 .orElseThrow(() -> new PaymentException("Account not found"));
+
+        if (!account.getId().toString().equals(userId)) {
+            throw new PaymentException("Unauthorized - account does not belong to you");
+        }
+
         account.setBalance(account.getBalance().add(amount));
         Account saved = accountRepository.save(account);
 
@@ -84,4 +93,16 @@ public class AccountService {
 
         return saved;
     }
+
+    public AccountBalanceResponse getBalance(String accountNumber, String userId) {
+        Account account = accountRepository.findByNumber(accountNumber)
+                .orElseThrow(() -> new PaymentException("Account not found"));
+
+        if (!account.getId().toString().equals(userId)) {
+            throw new PaymentException("Unauthorized - account does not belong to you");
+        }
+
+        return accountMapper.toAccountBalanceResponse(account);
+    }
+
 }
