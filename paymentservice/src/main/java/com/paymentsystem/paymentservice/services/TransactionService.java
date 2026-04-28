@@ -5,7 +5,6 @@ import com.paymentsystem.paymentservice.domain.entity.Transaction;
 import com.paymentsystem.paymentservice.domain.enums.AccountStatus;
 import com.paymentsystem.paymentservice.domain.enums.TransactionStatus;
 import com.paymentsystem.paymentservice.exception.PaymentException;
-import com.paymentsystem.paymentservice.kafka.producers.PaymentEventProducer;
 import com.paymentsystem.paymentservice.kafka.event.TransactionEvent;
 import com.paymentsystem.paymentservice.outbox.OutboxEvent;
 import com.paymentsystem.paymentservice.repositories.AccountRepository;
@@ -113,6 +112,32 @@ public class TransactionService {
         outboxEventRepository.save(outboxEvent);
 
         return saved;
+    }
+
+    @Transactional
+    public void freezeAccount(UUID transactionId) {
+        Transaction original = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new PaymentException("Transaction not found"));
+
+        Account sender = accountRepository.findByIdWithLock(original.getSender().getId())
+                .orElseThrow();
+        sender.setStatus(AccountStatus.FROZEN);
+        accountRepository.save(sender);
+    }
+
+    @Transactional
+    public void unfreezeAccount(UUID transactionId) {
+        Transaction original = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new PaymentException("Transaction not found"));
+
+        Account sender = accountRepository.findByIdWithLock(original.getSender().getId())
+                .orElseThrow();
+
+        // For Approving alerts below HIGH which won't be frozen.
+        if(sender.getStatus() != AccountStatus.FROZEN) return;
+
+        sender.setStatus(AccountStatus.ACTIVE);
+        accountRepository.save(sender);
     }
 
     @Transactional
