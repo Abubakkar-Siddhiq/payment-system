@@ -52,4 +52,9 @@ public class KafkaConfig {
     public NewTopic fraudAlertTopic() {
         return TopicBuilder.name("fraud-alert-topic").partitions(1).replicas(1).build();
     }
+
+    @Bean
+    public NewTopic fraudReviewTopic() { // Approve / Reject
+        return TopicBuilder.name("fraud-review-topic").partitions(1).replicas(1).build();
+    }
 }
