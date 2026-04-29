@@ -89,3 +89,73 @@ services:
     networks:
       - internal
       - gateway-network
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+      - gateway-network
+    depends_on:
+      - auth-service
+      - payment-service
+      - fraud-service
+
+  auth-service:
+    build:
+      context: ./authservice
+      dockerfile: Dockerfile
+    expose:
+      - "8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+    depends_on:
+      - auth-db
+      - broker
+
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    expose:
+      - "8082"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+    depends_on:
+      - db
+      - redis
+      - broker
+
+  fraud-service:
+    build:
+      context: ./frauddetectionsystem
+      dockerfile: Dockerfile
+    expose:
+      - "8083"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+    depends_on:
+      - fraud-db
+      - broker
+
+  notification-service:
+    build:
+      context: ./notificationservice
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - internal
+    depends_on:
+      - broker
