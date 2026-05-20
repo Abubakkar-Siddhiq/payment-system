@@ -7,6 +7,7 @@
 
 <br />
 <div align="center">
+  <h3 align="center">💸💸💸</h3>
   <h3 align="center">Payment System</h3>
 
   <p align="center">
@@ -68,51 +69,51 @@ Key capabilities:
 ## Architecture
 
 ```
-                        Client
-                          │
-                    ┌─────▼──────┐
-                    │ API Gateway │  JWT Auth · Rate Limiting
-                    │  Port 8080  │  Role-based Routing
-                    └─────┬──────┘
-                          │
-          ┌───────────────┼───────────────┐
-          │               │               │
-    ┌─────▼──────┐  ┌─────▼──────┐  ┌────▼───────┐
-    │    Auth    │  │  Payment   │  │   Fraud    │
-    │  Service   │  │  Service   │  │  Service   │
-    │  Port 8081 │  │  Port 8082 │  │  Port 8083 │
-    └─────┬──────┘  └─────┬──────┘  └────┬───────┘
-          │               │               │
-       Auth DB       Payment DB       Fraud DB
-      (Postgres)     (Postgres)      (Postgres)
-                          │
-                     Redis Cache
-                   (Idempotency +
-                    Rate Limiting)
-
-                ────── Kafka Event Bus ──────
-
-  Auth Service     → user-registered-topic   → Payment Service
-  Payment Service  → payment-topic           → Fraud Service
-  Payment Service  → payment-topic           → Notification Service
-  Fraud Service    → fraud-alert-topic       → Payment Service
-  Fraud Service    → fraud-review-topic      → Payment Service
-
-                    ┌──────────────┐
-                    │ Notification │
-                    │   Service    │
-                    │  Port 8084   │
-                    └──────────────┘
-
-              ┌─────────────────────────┐
-              │   Grafana LGTM Stack    │
-              │  Traces · Logs · Metrics│
-              └─────────────────────────┘
-
-         ╔══════════════════════════════════╗
-         ║      Docker Internal Network     ║
-         ║  Only port 8080 exposed externally║
-         ╚══════════════════════════════════╝
+                                        Client
+                                           │
+                                    ┌──────▼─────┐
+                                    │ API Gateway│  JWT Auth · Rate Limiting
+                                    │  Port 8080 │  Role-based Routing
+                                    └─────┬──────┘
+                                          │
+                          ┌───────────────┼───────────────┐
+                          │               │               │
+                    ┌─────▼──────┐  ┌─────▼──────┐  ┌────▼───────┐
+                    │    Auth    │  │  Payment   │  │   Fraud    │
+                    │  Service   │  │  Service   │  │  Service   │
+                    │  Port 8081 │  │  Port 8082 │  │  Port 8083 │
+                    └─────┬──────┘  └─────┬──────┘  └────┬───────┘
+                          │               │               │
+                       Auth DB       Payment DB       Fraud DB
+                      (Postgres)     (Postgres)      (Postgres)
+                                          │
+                                     Redis Cache
+                                   (Idempotency +
+                                    Rate Limiting)
+                
+                                ────── Kafka Event Bus ──────
+                
+                  Auth Service     → user-registered-topic   → Payment Service
+                  Payment Service  → payment-topic           → Fraud Service
+                  Payment Service  → payment-topic           → Notification Service
+                  Fraud Service    → fraud-alert-topic       → Payment Service
+                  Fraud Service    → fraud-review-topic      → Payment Service
+                
+                                    ┌──────────────┐
+                                    │ Notification │
+                                    │   Service    │
+                                    │  Port 8084   │
+                                    └──────────────┘
+                
+                              ┌─────────────────────────┐
+                              │   Grafana LGTM Stack    │
+                              │  Traces · Logs · Metrics│
+                              └─────────────────────────┘
+                
+                         ╔════════════════════════════════════╗
+                         ║      Docker Internal Network       ║
+                         ║  Only port 8080 exposed externally ║
+                         ╚════════════════════════════════════╝
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
